@@ -1,1 +1,1 @@
-rayquaza
+rattata,mankey,pidgey,seel,poliwag,eevee,mr-mime,mewtwo

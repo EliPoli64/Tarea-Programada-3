@@ -1,23 +1,37 @@
 # Elaborado por: Elías Ramírez Hernández y Lindsay Nahome Marín Sánchez
-# Fecha de creación 24-05-2024 10:30am
+# Fecha de creación 31-05-2024 10:30am
 # Última modificación: 03-06-2024 9:03pm
-# Versión: 3.12.3
+# Versión: 3.12.4
 
 # Importación de librerías
 
 from tkinter import *
 from funciones import *
 from clases import *
-import playsound
 from tkinter import messagebox
+from PIL import ImageTk
 
 # Atrapar-Pokedex-Tienda-Créditos-Salir
 
 def salirMenu(interfaz):
+    """
+    Funcionalidad: Regresa al menú principal de la aplicación
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    Salida:
+    -menuPrincipal(función)
+    """
     interfaz.destroy()
     return menuPrincipal()
 
 def crearVentana(interfaz):
+    """
+    Funcionalidad: Crea una nueva ventana.
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    Salida:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    """
     interfaz.destroy()
     interfaz = Tk()
     interfaz.title("Simulador de encuentro")
@@ -27,11 +41,29 @@ def crearVentana(interfaz):
     return interfaz
 
 def huirBatalla(interfaz):
+    """
+    Funcionalidad: llama a una messagebox que muestra un mensaje de huida y retorna al menú principal.
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    Salida:
+    -menuPrincipal(función)
+    """
     messagebox.showinfo(title="Huida",message="¡Escapaste sin problemas!")
+    tocarMusicaMenu()
     interfaz.destroy()
     return menuPrincipal()
 
 def opcionCorreo(interfaz,nombrePokemon,pts):
+    """
+    Funcionalidad: llama a la función enviarCorreo que envía un correo electrónico con información 
+    del Pokémon atrapado y llama al menú principal.
+    Entradas:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    -nombrePokemon(str): Nombre del Pokémon a enviar.
+    -pts(int): número de puntos que dio el Pokémon atrapado.
+    Salida:
+    -menuPrincipal(función)
+    """
     if nombrePokemon=="mr-mime":
         nombrePokemon="Mr. Mime"
     else:
@@ -40,25 +72,34 @@ def opcionCorreo(interfaz,nombrePokemon,pts):
     return salirMenu(interfaz)
 
 def pokemonAtrapado(interfaz,pts,nombrePokemon,tuplaPokemon):
-    interfaz.destroy()
-    interfaz = Tk()
+    """
+    Funcionalidad: muestra la ventana en la que el Pokémon está atrapado.
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    -nombrePokemon(str): Nombre del Pokémon a enviar.
+    -pts(int): número de puntos que dio el Pokémon atrapado.
+    -tuplaPokemon(tuple): Tupla con la información del Pokémon.
+    Salida:
+    -menuPrincipal(función)
+    """
+    tocarMusicaMenu()
     listaJugador=cargarPersonaje()
     listaJugador[0]=listaJugador[0]+pts
     grabarPersonaje(listaJugador)
     agregarCapturado(tuplaPokemon)
-    interfaz.resizable(False,False)
-    interfaz.geometry("550x320")
-    interfaz.eval('tk::PlaceWindow . center')
+    interfaz=crearVentana(interfaz)
     fondo=PhotoImage(file="atrapado.png")
     Label(interfaz, image=fondo).place(x=0, y=0)
     interfaz.title("¡Atrapado!")
     if nombrePokemon=="mr-mime":
         nombrePokemon="Mr. Mime"
         Label(interfaz, text="Mr. Mime",font=("Arial", 20),bg="#EFE4B0").place(x=40, y=35)
+        Label(interfaz, text="¡Mr. Mime ha sido capturado!",font=("Arial", 16),
+            bg="#C3C3C3").place(x=15,y=205)
     else:
         Label(interfaz, text=nombrePokemon.capitalize(),font=("Arial", 20),bg="#EFE4B0").place(x=40, y=35)
-    Label(interfaz, text="¡"+nombrePokemon.capitalize()+" ha sido capturado!",font=("Arial", 16),
-          bg="#C3C3C3").place(x=15,y=205)
+        Label(interfaz, text="¡"+nombrePokemon.capitalize()+" ha sido capturado!",font=("Arial", 16),
+            bg="#C3C3C3").place(x=15,y=205)
     Label(interfaz, text=pts,font=("Arial", 20),bg="#EFE4B0").place(x=158, y=76)
     Button(interfaz, text="Compartir",font=("Arial",20),
            command=lambda:opcionCorreo(interfaz,nombrePokemon,pts)).place(x=40,y=250)
@@ -67,9 +108,23 @@ def pokemonAtrapado(interfaz,pts,nombrePokemon,tuplaPokemon):
     interfaz.mainloop()
     return ""
 
-def opcionAtrapar(interfaz,nombrePokemon,pts,listaJugador,index,baya,tuplaPokemon):
+def opcionAtrapar(interfaz:Tk,nombrePokemon:str,pts:int,listaJugador:list,index:int,baya:bool,tuplaPokemon:tuple,fotoPokemon:Image):
+    """
+    Funcionalidad:
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    -nombrePokemon(str): Nombre del Pokémon a enviar.
+    -pts(int): número de puntos que dio el Pokémon atrapado.
+    -listaJugador(list):
+    -index(int): Index de la Pokéball gastada.
+    -baya(bool): Indica si el Pokémon a atrapar está bajo la influencia de una baya.
+    -tuplaPokemon(tuple): Una tupla con tres características del pokémon: Nombre, puntos y atributo de shiny.
+    Salida:
+    -pokemonAtrapado(función): Si el Pokémon fue atrapado graba los datos con la función.
+    -Messagebox(TkObject): Indica que el usuario no tiene Pokéballs de ese tipo.
+    -menuAtrapar(función): Si el Pokémon se escapó.
+    """
     if listaJugador[index]<=0:
-        print("no iohajcb")
         return messagebox.showwarning(title="No te quedan Pokéballs",message="¡No tienes esas Pokéballs!")
     listaJugador[index]=listaJugador[index]-1
     grabarPersonaje(listaJugador)
@@ -77,32 +132,54 @@ def opcionAtrapar(interfaz,nombrePokemon,pts,listaJugador,index,baya,tuplaPokemo
         messagebox.showinfo(title="¡Ya está!",message="¡Pokémon capturado!")
         return pokemonAtrapado(interfaz,pts,nombrePokemon,tuplaPokemon)
     messagebox.showinfo(title="¡Fracaso!",message="¡El Pokémon se ha escapado!")
-    return menuAtrapar(interfaz,baya,tuplaPokemon)
+    return menuAtrapar(interfaz,baya,tuplaPokemon,fotoPokemon)
 
-def tirarBaya(interfaz,listaJugador,tuplaPokemon):
+def tirarBaya(interfaz:Tk,listaJugador:list,tuplaPokemon:tuple,fotoPokemon:Image):
+    """
+    Funcionalidad: Tira una baya al Pokémon para aumentar su posibilidad de ser atrapado.
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    -listaJugador(list): Una lista con la información del jugador (puntaje, cantidad de pokéballs y bayas).
+    -tuplaPokemon(tuple): Una tupla con tres características del pokémon: Nombre, puntos y atributo de shiny.
+    Salida:
+    -Messagebox(TkObject): Indica que el usuario no tiene Bayas.
+    -menuPrincipal(función)
+    """
     if listaJugador[5]<=0:
         return messagebox.showwarning(title="No te quedan Bayas",message="¡No tienes Bayas!")
     listaJugador[5]=listaJugador[5]-1
     grabarPersonaje(listaJugador)
-    return menuAtrapar(interfaz,True,tuplaPokemon)
+    return menuAtrapar(interfaz,True,tuplaPokemon,fotoPokemon)
 
-def preAtrapar(interfaz):
-    interfaz.destroy()
-    interfaz=Tk()
+def preAtrapar(interfaz:Tk):
+    """
+    Funcionalidad: Genera un encuentro aleatorio con un pokémon e inicializa los valores para este.
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    Salida:
+    -menuAtrapar(función)
+    """
+    tocarMusicaEncuentro()
     tuplaPokemon=encontrarPokemon()
-    return menuAtrapar(interfaz,False,tuplaPokemon)
+    return menuAtrapar(interfaz,False,tuplaPokemon,obtenerImagen(tuplaPokemon[0],tuplaPokemon[2]))
 
-def menuAtrapar(interfaz,baya,tuplaPokemon):
+def menuAtrapar(interfaz:Tk,baya:bool,tuplaPokemon:tuple,fotoPokemon:Image):
+    """
+    Funcionalidad: Muestra el menú de encuentro con un pokémon para ser atrapado.
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    -baya(bool): Indica si el Pokémon a atrapar está bajo la influencia de una baya.
+    -tuplaPokemon(tuple): Una tupla con tres características del pokémon: Nombre, puntos y atributo de shiny.
+    Salida:
+    -menuPrincipal(función)
+    """
     listaJugador=cargarPersonaje()
-    interfaz.title("Atrapar Pokémon")
-    interfaz.resizable(False,False)
-    interfaz.geometry("550x320")
-    interfaz.eval('tk::PlaceWindow . center') # Coloca la ventana en el centro de la pantalla
+    interfaz = crearVentana(interfaz) # Coloca la ventana en el centro de la pantalla
     fondo=PhotoImage(file="encuentro.png")
-    imagenPokemon=obtenerImagen(tuplaPokemon[0],tuplaPokemon[-1])
+    imagenPokemon=ImageTk.PhotoImage(fotoPokemon)
     Label(interfaz, image=fondo).place(x=0, y=0)
     if tuplaPokemon[0]=="mr-mime":
-        Label(interfaz, text="Mr. Mime",font=("Arial", 20)).place(x=40, y=35)
+        Label(interfaz, text="Mr. Mime",font=("Arial", 20),bg="#EFE4B0").place(x=40, y=35)
     else:
         Label(interfaz, text=tuplaPokemon[0].capitalize(),font=("Arial", 20),bg="#EFE4B0").place(x=40, y=35)
     Label(interfaz, text=tuplaPokemon[1],font=("Arial", 20),bg="#EFE4B0").place(x=158, y=76)
@@ -119,61 +196,89 @@ def menuAtrapar(interfaz,baya,tuplaPokemon):
     Label(interfaz, text="Bayas: "+str(listaJugador[5]),bg="#C3C3C3").place(x=20,y=290)
     Button(interfaz, text="Huir",command=lambda:huirBatalla(interfaz),font=("Arial", 20)).place(x=455,y=238)
     Button(interfaz, image=imgPoke, relief="flat", 
-           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,1,baya,tuplaPokemon)).place(x=300,y=210)
+           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,1,baya,tuplaPokemon,fotoPokemon)).place(x=300,y=210)
     Button(interfaz, image=imgSuper, relief="flat", 
-           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,2,baya,tuplaPokemon)).place(x=350,y=210)
+           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,2,baya,tuplaPokemon,fotoPokemon)).place(x=350,y=210)
     Button(interfaz, image=imgUltra, relief="flat", 
-           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,3,baya,tuplaPokemon)).place(x=300,y=270)
+           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,3,baya,tuplaPokemon,fotoPokemon)).place(x=300,y=270)
     Button(interfaz, image=imgMaster, relief="flat", 
-           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,4,baya,tuplaPokemon)).place(x=350,y=270)
+           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,4,baya,tuplaPokemon,fotoPokemon)).place(x=350,y=270)
     Button(interfaz, image=imgBaya, relief="flat", 
-           command=lambda:tirarBaya(interfaz,listaJugador,tuplaPokemon)).place(x=400,y=240)
+           command=lambda:tirarBaya(interfaz,listaJugador,tuplaPokemon,fotoPokemon)).place(x=400,y=240)
     interfaz.mainloop()
     return
 
-def menuPokedex(interfaz):
+def menuPokedex(interfaz:Tk):
+    """
+    Funcionalidad: Muestra el menú de la tienda pokédex.
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    Salida:
+    -N/A
+    """
     archivo=open("pokemon.txt","r")
     lista=archivo.readline().split(",")
     archivo.close()
     interfaz.destroy()
-    interfaz = Tk()
-    interfaz.title("Pokédex")
-    interfaz.resizable(True,True)
-    #interfaz.geometry("550x320")
-    interfaz.eval('tk::PlaceWindow . center') # Coloca la ventana en el centro de la pantalla
+    interfaz=Tk()   # 660x560
+    interfaz.title("Simulador de encuentro")
     i=1
     listaPokes=cargarBaseModificable()
+    listaCargados=[]
     diccImagenes={}
-    while i <= len(lista):
+    fondo=PhotoImage(file="pokedex.png")
+    Label(interfaz, image=fondo).place(x=0, y=0)
+    cuenta=1
+    while i<=len(lista) or cuenta<=len(lista): 
         try:
-            diccImagenes[i]=obtenerImagen(listaPokes[i-1][0],False)
-            if listaPokes[i-1][0]=="mr-mime":
-                Label(interfaz, text="Mr. Mime").grid(column=(i-1)%7,row=i//7+2)
-            else:
-                Label(interfaz, text=listaPokes[i-1][0].capitalize()).grid(column=(i-1)%7,row=i//7+2)
+            if listaPokes[i-1][0] not in listaCargados:
+                diccImagenes[i]=ImageTk.PhotoImage((obtenerImagen(listaPokes[i-1][0],False)))
+                if listaPokes[i-1][0]=="mr-mime":
+                    Label(interfaz, text="Mr. Mime").grid(column=(cuenta-1)%6,row=((cuenta-1)//6)*2+2)
+                    listaCargados.append(listaPokes[i-1][0])
+                else:
+                    Label(interfaz, text=listaPokes[i-1][0].capitalize()).grid(column=(cuenta-1)%6,row=((cuenta-1)//6)*2+2) #Tag
+                    listaCargados.append(listaPokes[i-1][0])
+                Label(interfaz, image = diccImagenes[i]).grid(column=(cuenta-1)%6,row=((cuenta-1)//6)*2+1) # Imagen
+                print("Generados: "+str(cuenta))
+                cuenta+=1
         except:
             diccImagenes[i]=PhotoImage(file="noEncontrado.png")
-            Label(interfaz, text="No encontrado").grid(column=(i-1)%7,row=i//7+2)
-        Label(interfaz, image = diccImagenes[i]).grid(column=(i-1)%7,row=i//7+1)
+            Label(interfaz, text="No encontrado").grid(column=(cuenta-1)%6,row=((cuenta-1)//6)*2+2) # Tag
+            Label(interfaz, image = diccImagenes[i]).grid(column=(cuenta-1)%6,row=((cuenta-1)//6)*2+1) # Imagen
+            print("Generados: "+str(cuenta))
+            cuenta+=1
         i+=1
-        print("ksndc")
+    Label(interfaz,text="\n\n\n\n\n",bg="#DA1E2D").grid(column=0,row=0)
     Button(interfaz, text="Salir", font=("Arial",16),
-           command=lambda:salirMenu(interfaz)).place(x=440,y=250)
+           command=lambda:salirMenu(interfaz)).grid(column=5,row=9)
     interfaz.mainloop()
     return 
 
 def opcionComprar(interfaz,listaJugador,index):
+    """
+    Funcionalidad: Refresca la ventana para mostrar el cambio en las estadísticas después
+    de una compra.
+    Entradas:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    -listaJugador(list): Una lista con la información del jugador (puntaje, cantidad de pokeballs y bayas).
+    -index(int): El índice del objeto que fue comprado.
+    Salida:
+    -menuTienda(función)
+    """
     listaJugador = comprarItem(listaJugador, index)
     return menuTienda(interfaz)
 
 def menuTienda(interfaz):
+    """
+    Funcionalidad: Muestra el menú de la tienda pokémon.
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    Salida:
+    -N/A
+    """
     listaJugador=cargarPersonaje()
-    interfaz.destroy()
-    interfaz=Tk()
-    interfaz.resizable(False,False)
-    interfaz.title("Simulador de encuentro")
-    interfaz.geometry("550x320")
-    interfaz.eval('tk::PlaceWindow . center') # Coloca la ventana en el centro de la pantalla
+    interfaz = crearVentana(interfaz)
     fondo=PhotoImage(file="tienda.png")
     Label(interfaz, image=fondo).place(x=0, y=0)
     imgPoke=PhotoImage(file="poke.png")
@@ -203,34 +308,41 @@ def menuTienda(interfaz):
     return 
 
 def menuCreditos(interfaz):
-    interfaz.destroy()
-    interfaz=Tk()
-    interfaz.resizable(False,False)
-    interfaz.title("Simulador de encuentro")
-    interfaz.geometry("550x320")
-    interfaz.eval('tk::PlaceWindow . center') # Coloca la ventana en el centro de la pantalla
+    """
+    Funcionalidad: Muestra los créditos de la aplicación.
+    Entrada:
+    -interfaz(TkObject): La ventana que se está mostrando.
+    Salida:
+    -N/A
+    """
+    interfaz = crearVentana(interfaz)
     fondo=PhotoImage(file="creditos.png")
-    #Créditos con pokefont
     Label(interfaz, image=fondo).place(x=0, y=0)
     Label(interfaz,bg="#EFE4B0",font=("Segoe UI",10),
-          text= "Elaborado por Lindsay Nahome Marín Sánchez\ny Elías Ramírez Hernández").place(x=15, y=170)
+          text= "Elaborado por Lindsay Nahome Marín Sánchez y Elías Ramírez Hernández.").place(x=15, y=155)
     Label(interfaz,bg="#EFE4B0",font=("Segoe UI",10),
-          text= "Información recopilada de PokéAPI").place(x=15, y=200)
+          text= "Información recopilada de PokéAPI.").place(x=15, y=200)
     Label(interfaz,bg="#EFE4B0",font=("Segoe UI",10),
-          text= "Sprites de objetos conseguidos de los archivos de"+
-          "\nPokémon, en internet",).place(x=15, y=110) # Línea dividida 
+          text= "Sprites de objetos conseguidos de los archivos de los juegos de"+
+          " Pokémon.").place(x=15, y=110) # Línea dividida 
+    Label(interfaz,bg="#EFE4B0",font=("Segoe UI",10),
+          text= "¡Gracias por utilizar nuestra tarea!").place(x=15, y=245)
     Button(interfaz, text="Salir",
-           command=lambda:salirMenu(interfaz)).place(x=460,y=250)
+           command=lambda:salirMenu(interfaz), font=("Arial", 16)).place(x=460,y=250)
     interfaz.mainloop()
     return ""
 
 def menuPrincipal():
-    interfaz=Tk()
-    interfaz.resizable(False,False)
+    """
+    Funcionalidad: El menú principal de la aplicación. Muestra los botones con las diferentes 
+    funciones que tiene el programa.
+    Entrada:
+    -N/A
+    Salida:
+    -N/A
+    """
+    interfaz = crearVentana(interfaz=Tk())
     fondo=PhotoImage(file="banner.png")
-    interfaz.title("Simulador de encuentro")
-    interfaz.geometry("550x320")
-    interfaz.eval('tk::PlaceWindow . center') # Coloca la ventana en el centro de la pantalla
     Label(interfaz, image=fondo).place(x=0, y=0)
     Button(interfaz, text="Atrapar",font=("Arial", 20), 
            command=lambda:preAtrapar(interfaz)).place(x=40,y=15)
@@ -245,25 +357,24 @@ def menuPrincipal():
     interfaz.mainloop()
     return ""
 
-grabarBaseEstatica()
+# Programa principal
+try:
+    diccPokes=compararBasesDatos()
+except FileNotFoundError:
+    diccPokes=grabarBaseEstatica()
 try:
     listaListas = cargarBaseModificable()
 except FileNotFoundError:
     listaListas= grabarBaseModificable([])
-
 try:
     listaJugador=cargarPersonaje()
     if listaJugador==[0,0,0,0,0,0]:
         listaJugador=[300,10,0,0,0,0] # Evita que el jugador se atasque y quede sin recursos
 except:
-    listaJugador=[300,10,0,0,0,0]
+    listaJugador=[300,10,0,0,10000,0]
     grabarPersonaje(listaJugador)
+tocarMusicaMenu()
 menuPrincipal()
-
-
-
-
-
 
 """
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀

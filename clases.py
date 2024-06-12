@@ -1,5 +1,9 @@
-import pokebase as pb
+# Elaborado por: Elías Ramírez Hernández y Lindsay Nahome Marín Sánchez
+# Fecha de creación 31-05-2024 10:30am
+# Última modificación: 03-06-2024 9:03pm
+# Versión: 3.12.3
 
+#Definición de clases
 
 class Pokemon():
     nombre = ""
@@ -11,7 +15,7 @@ class Pokemon():
 
     def __init__(self):
         self.nombre = ""
-        self.tuplaMedidas= tuple()
+        self.tuplaMedidas = tuple()
         self.listaTipos = []
         self.puntos = 0
         self.esShiny = False
