@@ -16,6 +16,7 @@ from tkinter import messagebox
 import smtplib
 from email.message import EmailMessage
 from clases import *
+from playsound import playsound
 
 # Variables globales
 terminacionCorreo= ("gmail.com","outlook.com","hotmail.com","racsa.go.cr","estudiantec.cr")
@@ -44,6 +45,7 @@ def tocarMusicaMenu():
     -pygame.mixer.music.play(objeto Pygame): Reproduce la música del menú en ciclo 15 veces.
     """
     pygame.mixer.init()
+    pygame.mixer.music.set_volume(0.2)
     try:
         pygame.mixer.music.stop()
         pygame.mixer.music.unload()
@@ -52,7 +54,7 @@ def tocarMusicaMenu():
         pygame.mixer.music.load("musicaMenus.mp3")
     return pygame.mixer.music.play(loops=15)
 
-def tocarYippee():
+def tocarCompleta():
     """
     Funcionalidad: Toca un sonido para felicitar al usuario por terminar la pokédex.
     Entrada:
@@ -62,7 +64,8 @@ def tocarYippee():
     """
     pygame.mixer.music.stop()
     pygame.mixer.music.unload()
-    pygame.mixer.music.load("yippee.mp3")
+    pygame.mixer.music.load("pokedexCompleta.mp3")
+    #pygame.mixer.music.load("musicaMenus.mp3")
     return pygame.mixer.music.play(loops=1)
 
 def grabarBaseEstatica():
@@ -130,7 +133,7 @@ def cargarBaseModificable():
         baseMod.close()
     return listaListas
     
-def grabarBaseModificable(listaCapturados):
+def grabarBaseModificable(pokeActual,valor=True):
     """
     Funcionalidad: Guarda la base de datos modificable, esta es la que tiene la información de los pokémon atrapados.
     Entrada: 
@@ -138,23 +141,29 @@ def grabarBaseModificable(listaCapturados):
     Salida:
     -N/A
     """
+    if not valor:
+        baseMod = open("baseModificable.txt","wb")
+        pickle.dump([],baseMod)
+        baseMod.close()
+        return ""
+    baseMod = open("baseModificable.txt","rb")
+    listaCapturados=pickle.load(baseMod)
+    baseMod.close()
     baseMod = open("baseModificable.txt","wb")
-    listaObjetos=[]
-    for pokeActual in listaCapturados:
-        pokemonAtr = Pokemon()
-        pokemonAtr.asignarNombre(pokeActual[0])
-        pokemonAtr.asignarTuplaMedidas(pokeActual[1])
-        pokemonAtr.asignarListaTipos(pokeActual[2])
-        pokemonAtr.asignarPuntos(pokeActual[3])
-        sprite=pb.pokemon(pokeActual[0]).sprites
-        if pokeActual[3]//10==300 or pokeActual[3]//10==600 or pokeActual[3]//10==900 or pokeActual[3]//10==1800:
-            pokemonAtr.asignarEsShiny(True)
-            pokemonAtr.asignarImagen(sprite.front_shiny)
-        else:
-            pokemonAtr.asignarEsShiny(False)
-            pokemonAtr.asignarImagen(sprite.front_default)
-        listaObjetos.append(pokemonAtr)        
-    pickle.dump(listaObjetos,baseMod)
+    pokemonAtr = Pokemon()
+    pokemonAtr.asignarNombre(pokeActual[0])
+    pokemonAtr.asignarTuplaMedidas(pokeActual[1])
+    pokemonAtr.asignarListaTipos(pokeActual[2])
+    pokemonAtr.asignarPuntos(pokeActual[3])
+    sprite=pb.pokemon(pokeActual[0]).sprites
+    if pokeActual[3]//10==300 or pokeActual[3]//10==600 or pokeActual[3]//10==900 or pokeActual[3]//10==1800:
+        pokemonAtr.asignarEsShiny(True)
+        pokemonAtr.asignarImagen(sprite.front_shiny)
+    else:
+        pokemonAtr.asignarEsShiny(False)
+        pokemonAtr.asignarImagen(sprite.front_default)
+    listaCapturados.append(pokemonAtr)        
+    pickle.dump(listaCapturados,baseMod)
     baseMod.close()
     return ""
 
@@ -171,9 +180,7 @@ def agregarCapturado(tuplaPokemon):
     for key in diccPokes.keys(): # (pokemon,(infoPoke.height*10,infoPoke.weight*10),listaTipos,puntos)
         if diccPokes[key][0]==tuplaPokemon[0]:
             pokeActual=[tuplaPokemon[0],diccPokes[key][1],diccPokes[key][2],tuplaPokemon[1]]
-    listaCapturados=cargarBaseModificable()
-    listaCapturados.append(pokeActual)
-    grabarBaseModificable(listaCapturados)
+    grabarBaseModificable(pokeActual)
     return ""
 
 def obtenerImagen(nombrePoke,esShiny):
@@ -343,7 +350,7 @@ def compararBasesDatos():
             if diccPokes[key][0]==poke:
                 estaPoke=True
         if not estaPoke:
-            grabarBaseModificable([])
+            grabarBaseModificable("a",False)
             baseEst.close()
             archivo.close()
             return grabarBaseEstatica()
