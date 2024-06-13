@@ -17,15 +17,32 @@ import smtplib
 from email.message import EmailMessage
 from clases import *
 
+# Variables globales
+terminacionCorreo= ("gmail.com","outlook.com","hotmail.com","racsa.go.cr","estudiantec.cr")
+
 # Definición de funciones
 
 def tocarMusicaEncuentro():
+    """
+    Funcionalidad: Toca la música para los encuentros.
+    Entrada:
+    -N/A
+    Salida:
+    -pygame.mixer.music.play(objeto Pygame): Reproduce la música del encuentro en ciclo 5 veces.
+    """
     pygame.mixer.music.stop()
     pygame.mixer.music.unload()
     pygame.mixer.music.load("musicaBatalla.mp3")
     return pygame.mixer.music.play(loops=5)
 
 def tocarMusicaMenu():
+    """
+    Funcionalidad: Toca la música para los menús.
+    Entrada:
+    -N/A
+    Salida:
+    -pygame.mixer.music.play(objeto Pygame): Reproduce la música del menú en ciclo 15 veces.
+    """
     pygame.mixer.init()
     try:
         pygame.mixer.music.stop()
@@ -35,13 +52,26 @@ def tocarMusicaMenu():
         pygame.mixer.music.load("musicaMenus.mp3")
     return pygame.mixer.music.play(loops=15)
 
+def tocarYippee():
+    """
+    Funcionalidad: Toca un sonido para felicitar al usuario por terminar la pokédex.
+    Entrada:
+    -N/A
+    Salida:
+    -pygame.mixer.music.play(objeto Pygame): Reproduce un efecto de sonido de felicitación.
+    """
+    pygame.mixer.music.stop()
+    pygame.mixer.music.unload()
+    pygame.mixer.music.load("yippee.mp3")
+    return pygame.mixer.music.play(loops=1)
+
 def grabarBaseEstatica():
     """
     Funcionalidad: Guarda los datos del jugador y los objetos que tiene.
     Entrada:
     -N/A
     Salida:
-    -diccPokemon(dicc): Un diccionario con la información elemental de cada pokémon.
+    -pygame.mixer.music.play(objeto Pygame): Reproduce la música del menú en ciclo 15 veces.
     """
     diccPokes=obtenerPokes()
     baseEstatica=open("baseEstatica.txt","wb")
@@ -136,24 +166,11 @@ def agregarCapturado(tuplaPokemon):
     Salida:
     -N/A
     """
-    listaTipos=[]
-    sumaStats=0
-    infoPoke=pb.pokemon(tuplaPokemon[0])
-    for tipo in infoPoke.types:
-        listaTipos.append(tipo.type.name)
-    for stat in infoPoke.stats:
-        sumaStats+=stat.base_stat
-    if sumaStats<300:
-        puntos=300
-    elif 300<=sumaStats<=400:
-        puntos=600
-    elif 400<sumaStats<599:
-        puntos=900
-    else:
-        puntos=1800
-    if tuplaPokemon[-1]:
-        puntos*=10
-    pokeActual=[tuplaPokemon[0],(float(infoPoke.height*10),float(infoPoke.weight*10)),listaTipos,puntos]
+    baseEst = open("baseEstatica.txt","rb")
+    diccPokes=pickle.load(baseEst) #Nombre, puntos y atributo de shiny.
+    for key in diccPokes.keys(): # (pokemon,(infoPoke.height*10,infoPoke.weight*10),listaTipos,puntos)
+        if diccPokes[key][0]==tuplaPokemon[0]:
+            pokeActual=[tuplaPokemon[0],diccPokes[key][1],diccPokes[key][2],tuplaPokemon[1]]
     listaCapturados=cargarBaseModificable()
     listaCapturados.append(pokeActual)
     grabarBaseModificable(listaCapturados)
@@ -217,7 +234,7 @@ def decidirCaptura(pts,index,baya):
         ratioCaptura*=1.2
     return random.randint(1,100)<=ratioCaptura
 
-def enviarCorreo(nombrePokemon,pts):
+def enviarCorreo(correoElectronico,nombrePokemon,pts):
     """
     Funcionalidad: Comparte la información del pokémon atrapado mediante un correo eléctronico.
     Entradas:
@@ -230,7 +247,7 @@ def enviarCorreo(nombrePokemon,pts):
     correo.set_content("¡Mira! He atrapado este "+nombrePokemon+" y me dio "+str(pts)+" puntos.")
     correo['Subject'] = "¡He capturado algo! :D"
     correo["From"]="soggycat64@gmail.com"
-    correo["To"]="soggycat64@gmail.com"
+    correo["To"]=correoElectronico
     server = smtplib.SMTP(host='smtp.gmail.com',port=587)
     server.starttls()
     server.set_debuglevel(1)

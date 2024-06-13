@@ -10,8 +10,17 @@ from funciones import *
 from clases import *
 from tkinter import messagebox
 from PIL import ImageTk
+import re
 
-# Atrapar-Pokedex-Tienda-Créditos-Salir
+# Variables globales
+
+interfaz=Tk()   # Interfaz global
+icono=PhotoImage(file="logo.png")  # Imagen del programa
+interfaz.iconphoto(True, icono)  # Set al icono del programa
+interfaz.eval('tk::PlaceWindow . center') # Coloca la ventana en el centro de la pantalla
+interfaz.destroy() 
+
+# Funciones
 
 def salirMenu(interfaz):
     """
@@ -24,7 +33,7 @@ def salirMenu(interfaz):
     interfaz.destroy()
     return menuPrincipal()
 
-def crearVentana(interfaz):
+def crearVentana(interfaz:Tk):
     """
     Funcionalidad: Crea una nueva ventana.
     Entrada:
@@ -34,10 +43,10 @@ def crearVentana(interfaz):
     """
     interfaz.destroy()
     interfaz = Tk()
+    interfaz.eval('tk::PlaceWindow . center') # Coloca la ventana en el centro de la pantalla
     interfaz.title("Simulador de encuentro")
     interfaz.resizable(False,False)
     interfaz.geometry("550x320")
-    interfaz.eval('tk::PlaceWindow . center') # Coloca la ventana en el centro de la pantalla
     return interfaz
 
 def huirBatalla(interfaz):
@@ -53,7 +62,29 @@ def huirBatalla(interfaz):
     interfaz.destroy()
     return menuPrincipal()
 
-def opcionCorreo(interfaz,nombrePokemon,pts):
+def enviarCorreoAux(interfaz,correoElectronico:str,nombrePokemon,pts):
+    """
+    Funcionalidad: Valida el correo seleccionado.
+    Entrada:
+    -correoElectronico(str): Correo que el usuario insertó en la función opcionCorreo.
+    -nombrePokemon(str): Nombre del Pokémon a enviar.
+    -pts(int): número de puntos que dio el Pokémon atrapado.
+    Salida:
+    -enviarCorreo(función): Envía el correo ya validado.
+    """
+    if not re.search(r"@{1}\w+.{1}\w+.*\w*", correoElectronico):
+        return messagebox.showerror(title="Error", message= "El correo no sigue un formato válido.")
+    posArroba = correoElectronico.find("@")
+    print(correoElectronico[posArroba+1:])
+    if correoElectronico[posArroba+1:] not in terminacionCorreo:
+        return messagebox.showerror(title="Error", message= "El correo no tiene una terminación válida.")
+    try:
+        enviarCorreo(correoElectronico,nombrePokemon,pts)
+    except:
+        messagebox.showerror(title="Error", message= "El correo ingresado no es válido.")
+    return salirMenu(interfaz)
+
+def opcionCorreo(interfaz:Tk,nombrePokemon,pts):
     """
     Funcionalidad: llama a la función enviarCorreo que envía un correo electrónico con información 
     del Pokémon atrapado y llama al menú principal.
@@ -64,12 +95,23 @@ def opcionCorreo(interfaz,nombrePokemon,pts):
     Salida:
     -menuPrincipal(función)
     """
+    interfaz.destroy()
+    interfaz=Tk()
+    interfaz.title("Enviar correo electrónico")
+    interfaz.eval('tk::PlaceWindow . center')
     if nombrePokemon=="mr-mime":
         nombrePokemon="Mr. Mime"
     else:
         nombrePokemon=nombrePokemon.capitalize()
-    enviarCorreo(nombrePokemon,pts)
-    return salirMenu(interfaz)
+    Label(interfaz, text="Ingrese el correo al que quiere enviar, permite solo\n"+
+          "Gmail, Hotmail, Outlook, Racsa y Estudiantec:").grid(row=0,column=0)
+    correo=Entry(interfaz)
+    correo.grid(row=0,column=1)
+    Button(interfaz,text="Confirmar", font=("Arial",12),
+           command=lambda:enviarCorreoAux(interfaz,correo.get(),nombrePokemon,pts)).grid(row=1,column=1)
+    Button(interfaz, text="Salir", font=("Arial",12),
+           command=lambda:salirMenu(interfaz)).grid(row=1, column=0)
+    return ""
 
 def pokemonAtrapado(interfaz,pts,nombrePokemon,tuplaPokemon):
     """
@@ -220,7 +262,7 @@ def menuPokedex(interfaz:Tk):
     lista=archivo.readline().split(",")
     archivo.close()
     interfaz.destroy()
-    interfaz=Tk()   # 660x560
+    interfaz=Tk()
     interfaz.title("Simulador de encuentro")
     i=1
     listaPokes=cargarBaseModificable()
@@ -229,6 +271,7 @@ def menuPokedex(interfaz:Tk):
     fondo=PhotoImage(file="pokedex.png")
     Label(interfaz, image=fondo).place(x=0, y=0)
     cuenta=1
+    completada=True
     while i<=len(lista) or cuenta<=len(lista): 
         try:
             if listaPokes[i-1][0] not in listaCargados:
@@ -244,6 +287,7 @@ def menuPokedex(interfaz:Tk):
                 cuenta+=1
         except:
             diccImagenes[i]=PhotoImage(file="noEncontrado.png")
+            completada=False
             Label(interfaz, text="No encontrado").grid(column=(cuenta-1)%6,row=((cuenta-1)//6)*2+2) # Tag
             Label(interfaz, image = diccImagenes[i]).grid(column=(cuenta-1)%6,row=((cuenta-1)//6)*2+1) # Imagen
             print("Generados: "+str(cuenta))
@@ -252,6 +296,10 @@ def menuPokedex(interfaz:Tk):
     Label(interfaz,text="\n\n\n\n\n",bg="#DA1E2D").grid(column=0,row=0)
     Button(interfaz, text="Salir", font=("Arial",16),
            command=lambda:salirMenu(interfaz)).grid(column=5,row=9)
+    if completada:
+        tocarYippee()
+        tocarMusicaMenu()
+        messagebox.showinfo(title= "¡Felicidades!", message= "¡Completaste la Pokédex!\n¡Gracias por jugar!")
     interfaz.mainloop()
     return 
 
