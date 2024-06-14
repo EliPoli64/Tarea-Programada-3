@@ -45,7 +45,7 @@ def tocarMusicaMenu():
     -pygame.mixer.music.play(objeto Pygame): Reproduce la música del menú en ciclo 15 veces.
     """
     pygame.mixer.init()
-    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.set_volume(0.4)
     try:
         pygame.mixer.music.stop()
         pygame.mixer.music.unload()
@@ -65,7 +65,6 @@ def tocarCompleta():
     pygame.mixer.music.stop()
     pygame.mixer.music.unload()
     pygame.mixer.music.load("pokedexCompleta.mp3")
-    #pygame.mixer.music.load("musicaMenus.mp3")
     return pygame.mixer.music.play(loops=1)
 
 def grabarBaseEstatica():
@@ -245,6 +244,7 @@ def enviarCorreo(correoElectronico,nombrePokemon,pts):
     """
     Funcionalidad: Comparte la información del pokémon atrapado mediante un correo eléctronico.
     Entradas:
+    -correoElectronico(str): dirección a la cual se va a enviar el correo electrónico.
     -nombrePokemon(str): El nombre del pokémon actual.
     -pts(int): Cantidad de puntos que proporciona el pokémon.
     Salida:
@@ -332,7 +332,7 @@ def obtenerPokes(): # rattata,mankey,pidgey,seel,poliwag,eevee,mr-mime,mewtwo,se
 
 def compararBasesDatos():
     """
-    Funcionalidad: Compara la base de datos para verificar si una modificación se hizo
+    Funcionalidad: Compara las base de datos para verificar si una modificación se hizo
     a la lista de pokémon disponibles.
     Entrada:
     -N/A
@@ -342,8 +342,18 @@ def compararBasesDatos():
     """
     baseEst = open("baseEstatica.txt","rb")
     archivo=open("pokemon.txt","r")
-    diccPokes=pickle.load(baseEst)
+    diccPokes:dict=pickle.load(baseEst)
     listaPokes=archivo.readline().split(",")
+    for poke in listaPokes:
+        estaPoke = False
+        for key in diccPokes.keys():
+            if diccPokes[key][0]==poke:
+                estaPoke=True
+        if not estaPoke:
+            grabarBaseModificable("a",False)
+            baseEst.close()
+            archivo.close()
+            return grabarBaseEstatica()
     for key in diccPokes.keys():
         estaPoke = False
         for poke in listaPokes:

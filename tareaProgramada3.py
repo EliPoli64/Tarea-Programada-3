@@ -11,6 +11,7 @@ from clases import *
 from tkinter import messagebox
 from PIL import ImageTk
 import re
+from playsound import playsound
 
 # Variables globales
 
@@ -75,7 +76,6 @@ def enviarCorreoAux(interfaz,correoElectronico:str,nombrePokemon,pts):
     if not re.search(r"@{1}\w+.{1}\w+.*\w*", correoElectronico):
         return messagebox.showerror(title="Error", message= "El correo no sigue un formato válido.")
     posArroba = correoElectronico.find("@")
-    print(correoElectronico[posArroba+1:])
     if correoElectronico[posArroba+1:] not in terminacionCorreo:
         return messagebox.showerror(title="Error", message= "El correo no tiene una terminación válida.")
     try:
@@ -104,12 +104,12 @@ def opcionCorreo(interfaz:Tk,nombrePokemon,pts):
     else:
         nombrePokemon=nombrePokemon.capitalize()
     Label(interfaz, text="Ingrese el correo al que quiere enviar, permite solo\n"+
-          "Gmail, Hotmail, Outlook, Racsa y Estudiantec:").grid(row=0,column=0)
-    correo=Entry(interfaz)
+          "Gmail, Hotmail, Outlook, Racsa y Estudiantec:",font=("Arial",14)).grid(row=0,column=0)
+    correo=Entry(interfaz,width=30,font=("Arial",14))
     correo.grid(row=0,column=1)
-    Button(interfaz,text="Confirmar", font=("Arial",12),
+    Button(interfaz,text="Confirmar", font=("Arial",16),
            command=lambda:enviarCorreoAux(interfaz,correo.get(),nombrePokemon,pts)).grid(row=1,column=1)
-    Button(interfaz, text="Salir", font=("Arial",12),
+    Button(interfaz, text="Salir", font=("Arial",16),
            command=lambda:salirMenu(interfaz)).grid(row=1, column=0)
     return ""
 
@@ -135,14 +135,14 @@ def pokemonAtrapado(interfaz,pts,nombrePokemon,tuplaPokemon):
     interfaz.title("¡Atrapado!")
     if nombrePokemon=="mr-mime":
         nombrePokemon="Mr. Mime"
-        Label(interfaz, text="Mr. Mime",font=("Arial", 20),bg="#EFE4B0").place(x=40, y=35)
+        Label(interfaz, text="Mr. Mime",font=("Arial", 16),bg="#EFE4B0").place(x=23, y=20)
         Label(interfaz, text="¡Mr. Mime ha sido capturado!",font=("Arial", 16),
-            bg="#C3C3C3").place(x=15,y=205)
+            bg="#C3C3C3").place(x=15,y=209)
     else:
-        Label(interfaz, text=nombrePokemon.capitalize(),font=("Arial", 20),bg="#EFE4B0").place(x=40, y=35)
+        Label(interfaz, text=nombrePokemon.capitalize(),font=("Arial", 16),bg="#EFE4B0").place(x=23, y=20)
         Label(interfaz, text="¡"+nombrePokemon.capitalize()+" ha sido capturado!",font=("Arial", 16),
-            bg="#C3C3C3").place(x=15,y=205)
-    Label(interfaz, text=pts,font=("Arial", 20),bg="#EFE4B0").place(x=158, y=76)
+            bg="#C3C3C3").place(x=15,y=209)
+    Label(interfaz, text=pts,font=("Arial", 14),bg="#EFE4B0").place(x=130, y=45)
     Button(interfaz, text="Compartir",font=("Arial",20),
            command=lambda:opcionCorreo(interfaz,nombrePokemon,pts)).place(x=40,y=250)
     Button(interfaz, text="Salir", font=("Arial",20),
@@ -221,32 +221,39 @@ def menuAtrapar(interfaz:Tk,baya:bool,tuplaPokemon:tuple,fotoPokemon:Image):
     imagenPokemon=ImageTk.PhotoImage(fotoPokemon)
     Label(interfaz, image=fondo).place(x=0, y=0)
     if tuplaPokemon[0]=="mr-mime":
-        Label(interfaz, text="Mr. Mime",font=("Arial", 20),bg="#EFE4B0").place(x=40, y=35)
+        Label(interfaz, text="Mr. Mime",font=("Arial", 16),bg="#EFE4B0").place(x=23, y=20)
     else:
-        Label(interfaz, text=tuplaPokemon[0].capitalize(),font=("Arial", 20),bg="#EFE4B0").place(x=40, y=35)
-    Label(interfaz, text=tuplaPokemon[1],font=("Arial", 20),bg="#EFE4B0").place(x=158, y=76)
+        Label(interfaz, text=tuplaPokemon[0].capitalize(),font=("Arial", 16),bg="#EFE4B0").place(x=23, y=20)
+    Label(interfaz, text=tuplaPokemon[1],font=("Arial", 14),bg="#EFE4B0").place(x=130, y=45)
     Label(interfaz,image=imagenPokemon).place(x=359,y=70)
     imgPoke=PhotoImage(file="poke.png")
     imgSuper=PhotoImage(file="super.png")
     imgUltra=PhotoImage(file="ultra.png")
     imgMaster=PhotoImage(file="master.png")
     imgBaya=PhotoImage(file="baya.png")
+    imgHuir=PhotoImage(file="huir.png")
     Label(interfaz, text="Pokéballs: "+str(listaJugador[1]),bg="#C3C3C3").place(x=20,y=210)
     Label(interfaz, text="Superballs: "+str(listaJugador[2]),bg="#C3C3C3").place(x=20,y=230)
     Label(interfaz, text="Ultraballs: "+str(listaJugador[3]),bg="#C3C3C3").place(x=20,y=250)
     Label(interfaz, text="Masterballs: "+str(listaJugador[4]),bg="#C3C3C3").place(x=20,y=270)
     Label(interfaz, text="Bayas: "+str(listaJugador[5]),bg="#C3C3C3").place(x=20,y=290)
-    Button(interfaz, text="Huir",command=lambda:huirBatalla(interfaz),font=("Arial", 20)).place(x=455,y=238)
-    Button(interfaz, image=imgPoke, relief="flat", 
-           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,1,baya,tuplaPokemon,fotoPokemon)).place(x=300,y=210)
-    Button(interfaz, image=imgSuper, relief="flat", 
-           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,2,baya,tuplaPokemon,fotoPokemon)).place(x=350,y=210)
-    Button(interfaz, image=imgUltra, relief="flat", 
-           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,3,baya,tuplaPokemon,fotoPokemon)).place(x=300,y=270)
-    Button(interfaz, image=imgMaster, relief="flat", 
-           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],tuplaPokemon[1],listaJugador,4,baya,tuplaPokemon,fotoPokemon)).place(x=350,y=270)
-    Button(interfaz, image=imgBaya, relief="flat", 
-           command=lambda:tirarBaya(interfaz,listaJugador,tuplaPokemon,fotoPokemon)).place(x=400,y=240)
+    Label(interfaz, text="Selecciona una acción.",bg="#C3C3C3",font=("Arial", 20)).place(x=140,y=275)
+    Button(interfaz, image=imgHuir,command=lambda:huirBatalla(interfaz),relief="flat",
+           font=("Arial", 16),bg="#C3C3C3").place(x=445,y=277)
+    Button(interfaz, image=imgPoke, relief="flat", width=65, height=65,bg="#C3C3C3",
+           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],
+                            tuplaPokemon[1],listaJugador,1,baya,tuplaPokemon,fotoPokemon)).place(x=120,y=205)
+    Button(interfaz, image=imgSuper, relief="flat", width=65, height=65,bg="#C3C3C3",
+           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],
+                            tuplaPokemon[1],listaJugador,2,baya,tuplaPokemon,fotoPokemon)).place(x=200,y=205)
+    Button(interfaz, image=imgUltra, relief="flat", width=65, height=65,bg="#C3C3C3",
+           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],
+                            tuplaPokemon[1],listaJugador,3,baya,tuplaPokemon,fotoPokemon)).place(x=280,y=205)
+    Button(interfaz, image=imgMaster, relief="flat", width=65, height=65,bg="#C3C3C3",
+           command=lambda:opcionAtrapar(interfaz,tuplaPokemon[0],
+                            tuplaPokemon[1],listaJugador,4,baya,tuplaPokemon,fotoPokemon)).place(x=360,y=205)
+    Button(interfaz, image=imgBaya, relief="flat", width=65, height=65,bg="#C3C3C3",
+           command=lambda:tirarBaya(interfaz,listaJugador,tuplaPokemon,fotoPokemon)).place(x=440,y=205)
     interfaz.mainloop()
     return
 
@@ -272,10 +279,10 @@ def menuPokedex(interfaz:Tk):
     Label(interfaz, image=fondo).place(x=0, y=0)
     cuenta=1
     completada=True
-    while i<=len(lista) or cuenta<=len(lista): 
+    while i<=len(listaPokes) or cuenta<=len(lista): 
         try:
             if listaPokes[i-1][0] not in listaCargados:
-                diccImagenes[i]=ImageTk.PhotoImage((obtenerImagen(listaPokes[i-1][0],False)))
+                diccImagenes[i]=ImageTk.PhotoImage(Image.open(BytesIO(requests.get(listaPokes[i-1][-1]).content)))
                 if listaPokes[i-1][0]=="mr-mime":
                     Label(interfaz, text="Mr. Mime").grid(column=(cuenta-1)%6,row=((cuenta-1)//6)*2+2)
                     listaCargados.append(listaPokes[i-1][0])
@@ -297,8 +304,7 @@ def menuPokedex(interfaz:Tk):
     Button(interfaz, text="Salir", font=("Arial",16),
            command=lambda:salirMenu(interfaz)).grid(column=5,row=9)
     if completada:
-        tocarYippee()
-        tocarMusicaMenu()
+        tocarCompleta()
         messagebox.showinfo(title= "¡Felicidades!", message= "¡Completaste la Pokédex!\n¡Gracias por jugar!")
     interfaz.mainloop()
     return 
@@ -334,7 +340,7 @@ def menuTienda(interfaz):
     imgUltra=PhotoImage(file="ultra.png")
     imgMaster=PhotoImage(file="master.png") 
     imgBaya = PhotoImage(file="baya.png") # Importar imágenes
-    Label(interfaz, text=str(listaJugador[0]),bg="#F0D7B7").place(x=362,y=104)
+    Label(interfaz, text=str(listaJugador[0]),bg="#F0D7B7",font=("Arial",14)).place(x=355,y=100)
     Button(interfaz, image=imgPoke, relief="flat",
                     command=lambda:opcionComprar(interfaz,listaJugador,1)).place(x=112,y=160)
     Label(interfaz, text="Pokéball\nPrecio: 100pts").place(x=95, y=200)   
@@ -406,6 +412,7 @@ def menuPrincipal():
     return ""
 
 # Programa principal
+
 try:
     diccPokes=compararBasesDatos()
 except FileNotFoundError:
@@ -413,13 +420,14 @@ except FileNotFoundError:
 try:
     listaListas = cargarBaseModificable()
 except FileNotFoundError:
-    listaListas= grabarBaseModificable([])
+    listaListas= grabarBaseModificable("a",False)
 try:
     listaJugador=cargarPersonaje()
     if listaJugador==[0,0,0,0,0,0]:
         listaJugador=[300,10,0,0,0,0] # Evita que el jugador se atasque y quede sin recursos
+        grabarPersonaje(listaJugador)
 except:
-    listaJugador=[300,10,0,0,10000,0]
+    listaJugador=[300,10,0,0,0,0]
     grabarPersonaje(listaJugador)
 tocarMusicaMenu()
 menuPrincipal()

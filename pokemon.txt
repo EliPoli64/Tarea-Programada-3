@@ -1,1 +1,1 @@
-rattata,mankey,pidgey,seel,poliwag,eevee,mr-mime,mewtwo
+rattata,mankey,pidgey,seel,poliwag,eevee,mr-mime,mewtwo,sentret,ekans,mareep,wooper,hoppip,skarmory,swinub,celebi,wurmple,zangoose,poochyena,seedot,ralts,electrike,wingull,rayquaza
